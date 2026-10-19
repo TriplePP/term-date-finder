@@ -1,0 +1,22 @@
+{
+  "id": "mnsp",
+  "name": "Midsomer Norton Schools Partnership",
+  "academicYear": "2026-27",
+  "status": "verified",
+  "source": {
+    "url": "https://www.midsomernortonschoolspartnership.com/uploads/files/st.mary039s-ce-primary-school-term-dates-2026-27.pdf",
+    "checked": "2026-10-19"
+  },
+  "terms": [
+    { "term": 1, "start": "2026-09-03", "end": "2026-10-23" },
+    { "term": 2, "start": "2026-11-02", "end": "2026-12-18" },
+    { "term": 3, "start": "2027-01-04", "end": "2027-02-12" },
+    { "term": 4, "start": "2027-02-22", "end": "2027-03-25" },
+    { "term": 5, "start": "2027-04-12", "end": "2027-05-28" },
+    { "term": 6, "start": "2027-06-07", "end": "2027-07-23" }
+  ],
+  "insetDays": [
+    "2026-09-03", "2026-09-04", "2026-10-22",
+    "2026-10-23", "2026-11-25", "2027-01-04"
+  ]
+}
