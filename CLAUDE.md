@@ -4,16 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Phase 1 (one school's calendar) is built. `School Term Dates Calendar – Build Plan.md` is the source of truth for scope, stack, data model and later phases. Read it before starting new work.
+Phase 1 (one school's calendar) is done. Phase 2 (the page) is in progress: the site, share pages, resolver and GIAS importer are built; `data/schools.json` still holds only Midsomer Norton Primary until `import:gias` is run on a real GIAS CSV, and there is no BANES council dates file yet. `School Term Dates Calendar – Build Plan.md` is the source of truth for scope, stack, data model and later phases. Read it before starting new work.
 
 ## Commands
 
+- `npm run build` — `astro build` into `dist/`, then `build:ics`. This is the Cloudflare Pages build command; output directory `dist`.
+- `npm run dev` — Astro dev server (no `.ics` files; run `build:ics` for those)
 - `npm run build:ics` — write `dist/cal/<urn>.ics` for every school with verified dates, and copy `public/` into `dist/`
+- `npm run import:gias -- <csv>` — rebuild `data/schools.json` from a GIAS "All establishment data" CSV for the councils in `data/councils.json`; trusts are linked through `data/trusts.json` by GIAS trust name
 - `npm test` — run all tests (vitest); one file: `npx vitest run scripts/ics.test.ts`; one test: add `-t "<name>"`
-- `npm run typecheck` — `tsc --noEmit`
+- `npm run typecheck` — `tsc --noEmit` over `scripts/` and `src/**/*.ts` (not `.astro` files; `@astrojs/check` conflicts with TypeScript 7)
 - Scripts run with `tsx` and import each other with `.ts` extensions.
+- Astro is pinned to 7.4.1: 7.4.2 needs Node ≥ 22.23.4. `.node-version` pins Node 22 for Cloudflare.
 
-Phase 1 code lives in `scripts/`: `dates.ts` (UTC date helpers on `YYYY-MM-DD` strings), `holidays.ts` (holidays = gaps between terms), `ics.ts` (hand-rolled iCalendar writer) and `build-ics.ts`. For now the build reads only the trust layer, and the year is hard-coded.
+Code in `scripts/`: `dates.ts` (UTC date helpers on `YYYY-MM-DD` strings), `holidays.ts` (holidays = gaps between terms), `terms.ts` (first/last day for pupils), `resolve.ts` (override → trust → council, verified only; holds the hard-coded `ACADEMIC_YEAR`), `ics.ts` (hand-rolled iCalendar writer), `build-ics.ts`, `csv.ts` and `import-gias.ts`.
+
+Site in `src/`: `site.ts` (build-time data), `layouts/Base.astro`, `pages/index.astro` (council + school search) and `pages/school/[urn].astro` (preview and subscribe). Calendar links are made absolute in the browser from `location.origin`, so no domain is configured anywhere. Astro is set to emit no inline scripts or styles, so the CSP in `public/_headers` can stay strict; check `dist/*.html` for inline `<script>`/`<style>` after changing config.
 
 ## What this is
 

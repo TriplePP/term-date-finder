@@ -224,10 +224,10 @@ Four phases at about 30 minutes a day, each ending in a check before you move on
 
 ### Phase 1 – Your school's calendar (week 1)
 
-- [ ] Create the repo and folder layout
-- [ ] Hand-write the trust JSON for 2026–27
-- [ ] Write `build-ics.ts` to output one calendar file
-- [ ] Subscribe on your iPhone and in Google Calendar; check half-terms and inset days look right
+- [x] Create the repo and folder layout
+- [x] Hand-write the trust JSON for 2026–27
+- [x] Write `build-ics.ts` to output one calendar file
+- [x] Subscribe on your iPhone and in Google Calendar; check half-terms and inset days look right
 
 **Gate:** the calendar looks right on your own phone for a week.
 
@@ -235,8 +235,8 @@ Four phases at about 30 minutes a day, each ending in a check before you move on
 
 - [ ] Import GIAS for BANES schools and map each to its council or trust
 - [ ] Add the BANES council 2026–27 file
-- [ ] Build the Astro page: council and school dropdowns, preview, subscribe buttons
-- [ ] Add per-school share pages
+- [x] Build the Astro page: council and school dropdowns, preview, subscribe buttons
+- [x] Add per-school share pages
 - [ ] Deploy to Cloudflare Pages on your domain; add `_headers` and analytics
 
 **Gate:** five parents at your school subscribe.

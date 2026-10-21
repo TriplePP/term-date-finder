@@ -20,3 +20,16 @@ export interface School {
   council: string;
   trust?: string;
 }
+
+/** A council we cover, from data/councils.json. `laCode` is the GIAS "LA (code)". */
+export interface Council {
+  id: string;
+  name: string;
+  laCode: string;
+}
+
+/** Links a GIAS trust name to our trust id, from data/trusts.json. */
+export interface TrustLink {
+  id: string;
+  giasName: string;
+}

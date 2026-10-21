@@ -1,5 +1,6 @@
 import { addDays, compact } from "./dates.ts";
 import { deriveHolidays } from "./holidays.ts";
+import type { Layer } from "./resolve.ts";
 import type { DatesFile, School } from "./types.ts";
 
 // Never change this: it is part of every event UID, and changing a UID
@@ -18,7 +19,7 @@ interface CalEvent {
 
 /** Escape TEXT values (RFC 5545 section 3.3.11). */
 const escapeText = (text: string): string =>
-  text.replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 
 /** Fold a line to at most 75 octets, never splitting a UTF-8 character. */
 export function foldLine(line: string): string {
@@ -41,10 +42,14 @@ export function foldLine(line: string): string {
   return parts.join("\r\n ");
 }
 
-export function buildIcs(school: School, dates: DatesFile): string {
+export function buildIcs(school: School, dates: DatesFile, layer: Layer = "trust"): string {
   const year = dates.academicYear;
   const uid = (type: string, date: string) => `${school.urn}-${year}-${type}-${compact(date)}@${UID_DOMAIN}`;
   const sourceNote = `${DISCLAIMER} Source: ${dates.source.url}`;
+  const calDesc =
+    layer === "council"
+      ? `School holidays for ${school.name}, from the council's term dates. Inset days are not included. ${DISCLAIMER}`
+      : `School holidays and inset days for ${school.name}. ${DISCLAIMER}`;
 
   const events: CalEvent[] = [
     ...deriveHolidays(dates.terms).map((h) => ({
@@ -74,7 +79,7 @@ export function buildIcs(school: School, dates: DatesFile): string {
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeText(`${school.name} – term dates`)}`,
-    `X-WR-CALDESC:${escapeText(`School holidays and inset days for ${school.name}. ${DISCLAIMER}`)}`,
+    `X-WR-CALDESC:${escapeText(calDesc)}`,
     "X-WR-TIMEZONE:Europe/London",
     "REFRESH-INTERVAL;VALUE=DURATION:P1D",
     "X-PUBLISHED-TTL:P1D",
