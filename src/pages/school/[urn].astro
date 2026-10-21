@@ -1,0 +1,163 @@
+---
+import Base from "../../layouts/Base.astro";
+import { formatDate, formatRange, schools, schoolView, type SchoolView } from "../../site.ts";
+
+export function getStaticPaths() {
+  return schools.map((school) => ({ params: { urn: school.urn }, props: { view: schoolView(school) } }));
+}
+
+const { view } = Astro.props as { view: SchoolView };
+const { school, council, resolved, terms, items } = view;
+const calPath = `/cal/${school.urn}.ics`;
+const schoolConfirmed = resolved && resolved.layer !== "council";
+---
+
+<Base
+  title={`${school.name} term dates`}
+  description={`Holidays and inset days for ${school.name}${council ? `, ${council.name}` : ""}. Subscribe in your phone's calendar.`}
+>
+  <h1>{school.name}</h1>
+  {council && <p class="hint">{council.name}</p>}
+
+  {
+    !resolved && (
+      <div class="panel">
+        <p>We don't have checked dates for this school yet. Please check the school's website for now.</p>
+      </div>
+    )
+  }
+
+  {
+    resolved && (
+      <>
+        <p>
+          {schoolConfirmed ? (
+            <span class="badge ok">School dates confirmed</span>
+          ) : (
+            <span class="badge warn">Council dates only – inset days not confirmed</span>
+          )}
+        </p>
+
+        <div class="panel" id="next" hidden>
+          <p>
+            <strong>Next holiday:</strong> <span id="next-holiday" />
+          </p>
+          <p id="next-inset-row" hidden>
+            <strong>Next inset day:</strong> <span id="next-inset" />
+          </p>
+        </div>
+
+        <h2>Add to your calendar</h2>
+        <div class="buttons" id="subscribe" data-path={calPath}>
+          <a class="button" id="apple" href={calPath}>
+            iPhone, iPad or Mac
+          </a>
+          <a class="button" id="google" href={calPath} rel="noopener">
+            Google Calendar or Android
+          </a>
+          <div>
+            <div class="copy-row">
+              <input id="cal-url" type="text" readonly value={calPath} aria-label="Calendar address" />
+              <button class="button secondary" id="copy" type="button">
+                Copy
+              </button>
+            </div>
+            <p class="hint">For Outlook and other apps, add a calendar "from the internet" and paste this address.</p>
+          </div>
+          <p class="hint">
+            On Android, add the calendar in Google Calendar first. It then appears in your phone's calendar app.
+          </p>
+        </div>
+
+        <h2>Terms {resolved.dates.academicYear}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Term</th>
+              <th>First day for pupils</th>
+              <th>Last day</th>
+            </tr>
+          </thead>
+          <tbody>
+            {terms.map((t) => (
+              <tr data-end={t.lastDay}>
+                <td>{t.term}</td>
+                <td>{formatDate(t.firstDay)}</td>
+                <td>{formatDate(t.lastDay)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h2>Holidays and inset days</h2>
+        <table>
+          <tbody>
+            {items.map((item) => (
+              <tr
+                class={item.kind}
+                data-kind={item.kind}
+                data-start={item.start}
+                data-end={item.end}
+                data-label={`${item.name}: ${formatRange(item.start, item.end)}`}
+              >
+                <td>{item.name}</td>
+                <td>{formatRange(item.start, item.end)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!schoolConfirmed && (
+          <p class="hint">Your school sets its own inset days. They aren't shown here yet.</p>
+        )}
+
+        <p class="hint">
+          Source: <a href={resolved.dates.source.url} rel="noopener nofollow">{resolved.dates.name} term dates</a>
+          <br />
+          Last checked {formatDate(resolved.dates.source.checked)}.
+        </p>
+      </>
+    )
+  }
+</Base>
+
+<script>
+  // Fill in absolute calendar links for whichever domain serves the page.
+  const subscribe = document.querySelector<HTMLElement>("#subscribe");
+  if (subscribe) {
+    const https = new URL(subscribe.dataset.path!, location.origin).href;
+    const webcal = https.replace(/^https?:/, "webcal:");
+    document.querySelector<HTMLAnchorElement>("#apple")!.href = webcal;
+    document.querySelector<HTMLAnchorElement>("#google")!.href =
+      `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}`;
+
+    const field = document.querySelector<HTMLInputElement>("#cal-url")!;
+    const copy = document.querySelector<HTMLButtonElement>("#copy")!;
+    field.value = https;
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(https);
+        copy.textContent = "Copied";
+      } catch {
+        field.select();
+      }
+    });
+  }
+
+  // Grey out past dates and show what's coming next. Done in the browser
+  // because the page is built once and "today" keeps moving.
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" }); // YYYY-MM-DD
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>("tr[data-end]")];
+  for (const row of rows) row.classList.toggle("past", row.dataset.end! < today);
+
+  const upcoming = (kind: string) => rows.find((r) => r.dataset.kind === kind && r.dataset.end! >= today);
+  const holiday = upcoming("holiday");
+  if (holiday) {
+    document.querySelector("#next-holiday")!.textContent = holiday.dataset.label!;
+    const inset = upcoming("inset");
+    if (inset) {
+      document.querySelector("#next-inset")!.textContent = inset.dataset.label!.replace(/^Inset day: /, "");
+      document.querySelector<HTMLElement>("#next-inset-row")!.hidden = false;
+    }
+    document.querySelector<HTMLElement>("#next")!.hidden = false;
+  }
+</script>

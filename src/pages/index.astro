@@ -1,0 +1,68 @@
+---
+import Base from "../layouts/Base.astro";
+import { councilList, schools, schoolView } from "../site.ts";
+
+const views = schools.map(schoolView);
+// Only councils where at least one school has published dates.
+const councils = councilList.filter((c) => views.some((v) => v.school.council === c.id && v.resolved));
+const listed = views.filter((v) => councils.some((c) => c.id === v.school.council));
+---
+
+<Base
+  title="School term dates calendar"
+  description="Add your school's holidays and inset days to your phone's calendar. Free, and it updates when dates change."
+>
+  <h1>Your school's term dates, in your calendar</h1>
+  <p>
+    Pick your school and subscribe. Holidays and inset days appear in your phone's calendar and update if the
+    dates change.
+  </p>
+
+  <form id="finder" role="search">
+    <label for="council">Council</label>
+    <select id="council">
+      {councils.map((c) => <option value={c.id}>{c.name}</option>)}
+    </select>
+
+    <label for="query">School</label>
+    <input id="query" type="search" placeholder="Start typing your school's name" autocomplete="off" />
+  </form>
+
+  <ul class="school-list" id="schools">
+    {
+      listed.map((v) => (
+        <li data-council={v.school.council} data-name={v.school.name.toLowerCase()}>
+          <a href={`/school/${v.school.urn}`}>
+            <span>{v.school.name}</span>
+            {!v.resolved && <span class="note">Dates coming soon</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <p id="no-match" class="hint" hidden>No schools match. Try part of the name, such as "Midsomer".</p>
+</Base>
+
+<script>
+  const council = document.querySelector<HTMLSelectElement>("#council")!;
+  const query = document.querySelector<HTMLInputElement>("#query")!;
+  const items = [...document.querySelectorAll<HTMLLIElement>("#schools li")];
+  const noMatch = document.querySelector<HTMLElement>("#no-match")!;
+
+  function filter() {
+    const words = query.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const item of items) {
+      const name = item.dataset.name ?? "";
+      const show = item.dataset.council === council.value && words.every((w) => name.includes(w));
+      item.hidden = !show;
+      if (show) shown++;
+    }
+    noMatch.hidden = shown > 0;
+  }
+
+  document.querySelector("#finder")!.addEventListener("submit", (e) => e.preventDefault());
+  council.addEventListener("change", filter);
+  query.addEventListener("input", filter);
+  filter();
+</script>

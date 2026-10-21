@@ -1,0 +1,27 @@
+name: Report a wrong date
+description: Tell us a term date, holiday or inset day that looks wrong.
+title: "Wrong date: "
+labels: ["wrong-date"]
+body:
+  - type: markdown
+    attributes:
+      value: Please don't include any personal details, such as your child's name or class.
+  - type: input
+    id: school
+    attributes:
+      label: School
+      description: The school's name, or the address of its page on our site.
+    validations:
+      required: true
+  - type: textarea
+    id: date
+    attributes:
+      label: What's wrong?
+      description: Which date is wrong, and what it should be.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Where did you see the right date? (optional)
+      description: A link to the school's or council's term dates, if you have one.
