@@ -1,29 +1,21 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { buildIcs } from "./ics.ts";
-import type { DatesFile, School } from "./types.ts";
+import { resolveDates } from "./resolve.ts";
+import type { School } from "./types.ts";
 
-const YEAR = "2026-27";
 const OUT_DIR = "dist/cal";
 
-const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;
-
-const schools = readJson<School[]>("data/schools.json");
+const schools = JSON.parse(readFileSync("data/schools.json", "utf8")) as School[];
 mkdirSync(OUT_DIR, { recursive: true });
 
 let written = 0;
 for (const school of schools) {
-  // Phase 1: trust dates only. Override and council layers come in Phase 2.
-  const path = `data/trusts/${school.trust}/${YEAR}.json`;
-  if (!school.trust || !existsSync(path)) {
-    console.warn(`skip ${school.urn} ${school.name}: no trust dates`);
+  const resolved = resolveDates(school);
+  if (!resolved) {
+    console.warn(`skip ${school.urn} ${school.name}: no verified dates`);
     continue;
   }
-  const dates = readJson<DatesFile>(path);
-  if (dates.status !== "verified") {
-    console.warn(`skip ${school.urn} ${school.name}: ${path} is ${dates.status}`);
-    continue;
-  }
-  writeFileSync(`${OUT_DIR}/${school.urn}.ics`, buildIcs(school, dates));
+  writeFileSync(`${OUT_DIR}/${school.urn}.ics`, buildIcs(school, resolved.dates, resolved.layer));
   written++;
 }
 

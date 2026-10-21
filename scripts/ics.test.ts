@@ -42,6 +42,18 @@ describe("buildIcs", () => {
   });
 });
 
+describe("buildIcs from council dates", () => {
+  it("says inset days are not included", () => {
+    const council = buildIcs(school, mnsp as DatesFile, "council").replaceAll("\r\n ", "");
+    expect(council).toContain("Inset days are not included.");
+  });
+
+  it("escapes semicolons and commas in names", () => {
+    const named = buildIcs({ ...school, name: "A; B, C" }, mnsp as DatesFile);
+    expect(named).toContain("X-WR-CALNAME:A\\; B\\, C – term dates");
+  });
+});
+
 describe("foldLine", () => {
   it("does not split a multi-byte character", () => {
     const folded = foldLine("X:" + "–".repeat(40));
