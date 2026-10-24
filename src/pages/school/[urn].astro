@@ -67,7 +67,32 @@ const schoolConfirmed = resolved && resolved.layer !== "council";
           <p class="hint">
             On Android, add the calendar in Google Calendar first. It then appears in your phone's calendar app.
           </p>
+          <button type="button" class="link-button" id="help-trigger">Calendar not opening?</button>
         </div>
+
+        <dialog id="help-modal">
+          <h2>Calendar not opening?</h2>
+          <p>
+            Some browsers don't hand calendar links to your Calendar app automatically. Add the calendar manually
+            instead:
+          </p>
+          <p>
+            <strong>Mac:</strong> open Calendar, then File → New Calendar Subscription, and paste the address from
+            this page.
+          </p>
+          <p>
+            <strong>iPhone or iPad:</strong> Settings → Calendar → Accounts → Add Account → Other → Add Subscribed
+            Calendar, and paste the address.
+          </p>
+          <p>
+            <strong>Google Calendar:</strong> on the Google Calendar website, next to "Other calendars" choose +,
+            then "From URL", and paste the address.
+          </p>
+          <p>
+            <strong>Outlook and others:</strong> add a calendar "from the internet" and paste the address.
+          </p>
+          <button type="button" class="button secondary" id="help-close">Close</button>
+        </dialog>
 
         <h2>Terms {resolved.dates.academicYear}</h2>
         <table>
@@ -140,6 +165,15 @@ const schoolConfirmed = resolved && resolved.layer !== "council";
       } catch {
         field.select();
       }
+    });
+  }
+
+  const helpModal = document.querySelector<HTMLDialogElement>("#help-modal");
+  if (helpModal) {
+    document.querySelector("#help-trigger")!.addEventListener("click", () => helpModal.showModal());
+    document.querySelector("#help-close")!.addEventListener("click", () => helpModal.close());
+    helpModal.addEventListener("click", (e) => {
+      if (e.target === helpModal) helpModal.close();
     });
   }
 

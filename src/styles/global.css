@@ -197,6 +197,35 @@ select {
   margin: 0.25rem 0 0;
 }
 
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  justify-self: start;
+}
+
+dialog {
+  max-width: 28rem;
+  width: calc(100% - 2rem);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: var(--text);
+  background: var(--bg);
+}
+
+dialog h2 {
+  margin-top: 0;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
