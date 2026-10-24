@@ -1,0 +1,19 @@
+{
+  "id": "bathnes",
+  "name": "Bath and North East Somerset",
+  "academicYear": "2026-27",
+  "status": "verified",
+  "source": {
+    "url": "https://www.bathnes.gov.uk/sites/default/files/2026-27%20Final%20Approved%20Term%20Dates.pdf",
+    "checked": "2026-10-24"
+  },
+  "terms": [
+    { "term": 1, "start": "2026-09-02", "end": "2026-10-23" },
+    { "term": 2, "start": "2026-11-02", "end": "2026-12-18" },
+    { "term": 3, "start": "2027-01-04", "end": "2027-02-12" },
+    { "term": 4, "start": "2027-02-22", "end": "2027-03-25" },
+    { "term": 5, "start": "2027-04-12", "end": "2027-05-28" },
+    { "term": 6, "start": "2027-06-07", "end": "2027-07-22" }
+  ],
+  "insetDays": []
+}
