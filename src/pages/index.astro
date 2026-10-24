@@ -28,7 +28,7 @@ const listed = views.filter((v) => councils.some((c) => c.id === v.school.counci
     <input id="query" type="search" placeholder="Start typing your school's name" autocomplete="off" />
   </form>
 
-  <ul class="school-list" id="schools">
+  <ul class="school-list" id="schools" hidden>
     {
       listed.map((v) => (
         <li data-council={v.school.council} data-name={v.school.name.toLowerCase()}>
@@ -41,24 +41,42 @@ const listed = views.filter((v) => councils.some((c) => c.id === v.school.counci
     }
   </ul>
   <p id="no-match" class="hint" hidden>No schools match. Try part of the name, such as "Midsomer".</p>
+  <p id="more-hint" class="hint" hidden></p>
 </Base>
 
 <script>
+  const RESULT_LIMIT = 8;
+
   const council = document.querySelector<HTMLSelectElement>("#council")!;
   const query = document.querySelector<HTMLInputElement>("#query")!;
+  const list = document.querySelector<HTMLElement>("#schools")!;
   const items = [...document.querySelectorAll<HTMLLIElement>("#schools li")];
   const noMatch = document.querySelector<HTMLElement>("#no-match")!;
+  const moreHint = document.querySelector<HTMLElement>("#more-hint")!;
 
   function filter() {
     const words = query.value.toLowerCase().split(/\s+/).filter(Boolean);
-    let shown = 0;
-    for (const item of items) {
-      const name = item.dataset.name ?? "";
-      const show = item.dataset.council === council.value && words.every((w) => name.includes(w));
-      item.hidden = !show;
-      if (show) shown++;
+
+    if (words.length === 0) {
+      list.hidden = true;
+      for (const item of items) item.hidden = true;
+      noMatch.hidden = true;
+      moreHint.hidden = true;
+      return;
     }
-    noMatch.hidden = shown > 0;
+
+    const matches = items.filter(
+      (item) => item.dataset.council === council.value && words.every((w) => (item.dataset.name ?? "").includes(w)),
+    );
+    for (const item of items) item.hidden = true;
+    for (const item of matches.slice(0, RESULT_LIMIT)) item.hidden = false;
+
+    list.hidden = matches.length === 0;
+    noMatch.hidden = matches.length > 0;
+
+    const remaining = matches.length - RESULT_LIMIT;
+    moreHint.hidden = remaining <= 0;
+    if (remaining > 0) moreHint.textContent = `+${remaining} more — keep typing to narrow it down`;
   }
 
   document.querySelector("#finder")!.addEventListener("submit", (e) => e.preventDefault());
